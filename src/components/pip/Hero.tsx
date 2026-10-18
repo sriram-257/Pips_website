@@ -43,7 +43,7 @@ export function Hero({ onMoon }: { onMoon: () => void }) {
   const { chaos } = useSettings();
   return (
     <section id="top" className="relative overflow-hidden px-4 pb-24 pt-10 sm:pt-16">
-      <StarField count={10} seed={3} className="opacity-60" />
+      <StarField count={10} seed={3} className="hero-stars" />
       <Cloud className="deco deco-cloud animate-drift absolute -left-10 top-24 w-48 opacity-80 sm:w-72" />
       <Cloud className="deco deco-cloud animate-drift absolute -right-16 bottom-4 w-40 opacity-70 sm:w-80" style={{ animationDelay: "-6s" }} />
 

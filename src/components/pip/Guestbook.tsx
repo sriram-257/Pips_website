@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { SectionHeading, Star } from "./Decor";
+import { SectionHeading, Star, StarField } from "./Decor";
 import { blip } from "@/lib/sound";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -82,7 +82,8 @@ export function Guestbook() {
   };
 
   return (
-    <section id="guestbook" className="relative px-4 py-24">
+    <section id="guestbook" className="relative isolate px-4 py-24">
+      <StarField count={14} seed={51} className="chaos-only -z-10" />
       <SectionHeading kicker="Live public wall" title="The Midnight Guestbook">Leave a nickname and a dream wish for every visitor to see.</SectionHeading>
       <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-[1fr_1.2fr]">
         <form onSubmit={submit} noValidate className="reveal paper h-fit rounded-[2rem] p-6 sm:p-8">

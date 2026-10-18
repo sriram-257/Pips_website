@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Play, Square } from "lucide-react";
 import lullaby from "@/assets/pip_lullaby_box.jpg.asset.json";
 import lantern from "@/assets/pip_dream_lantern.jpg.asset.json";
-import { Cloud, SectionHeading, Star } from "./Decor";
+import { Cloud, SectionHeading, Star, StarField } from "./Decor";
 import { audioSupported, blip, startLullaby, stopLullaby } from "@/lib/sound";
 import { useSettings } from "./settings";
 
@@ -113,7 +113,8 @@ function LostStarLantern() {
 
 export function Projects() {
   return (
-    <section id="projects" className="relative px-4 py-24">
+    <section id="projects" className="relative isolate px-4 py-24">
+      <StarField count={14} seed={21} className="chaos-only -z-10" />
       <SectionHeading kicker="Work in progress" title="Three dream projects">Little worlds Pip is building right now. Each one is a bit different. Poke them.</SectionHeading>
       <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-2">
         <CloudRailway />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Minus, Plus, RotateCcw } from "lucide-react";
-import { Cloud, SectionHeading, Star } from "./Decor";
+import { Cloud, SectionHeading, Star, StarField } from "./Decor";
 import { useSettings } from "./settings";
 import { blip } from "@/lib/sound";
 
@@ -26,7 +26,8 @@ export function Workshop() {
   const change = (k: Key, d: number) => { setMix((m) => ({ ...m, [k]: Math.max(0, Math.min(5, m[k] + d)) })); blip(); };
 
   return (
-    <section id="workshop" className="relative px-4 py-24">
+    <section id="workshop" className="relative isolate px-4 py-24">
+      <StarField count={14} seed={41} className="chaos-only -z-10" />
       <SectionHeading kicker="Interactive" title="The Dream Workshop">Mix tonight's dream. Pip will handle the wiring.</SectionHeading>
       <div className="reveal mx-auto grid max-w-5xl gap-8 md:grid-cols-[1fr_1.1fr]">
         <div className="paper rounded-[2rem] p-6 sm:p-8">

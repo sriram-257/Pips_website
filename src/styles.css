@@ -226,3 +226,10 @@ html.dark.chaos { --sky-top: oklch(0.4 0.1 320); }
 
 section[id] { scroll-margin-top: 6.5rem; }
 @media (min-width: 1024px) { section[id] { scroll-margin-top: 4.5rem; } }
+
+/* chaos-only decoration: hidden normally, never above content (sections are isolated, layer is -z-10) */
+.chaos-only { display: none; }
+html.chaos .chaos-only { display: block; }
+.hero-stars { opacity: .6; transition: opacity .6s; }
+html.chaos .hero-stars { opacity: 1; }
+html.chaos .deco-star > * { filter: drop-shadow(0 0 4px var(--glow)); }

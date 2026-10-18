@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { SectionHeading, Star } from "./Decor";
+import { SectionHeading, Star, StarField } from "./Decor";
 
 const SCENES = [
   { title: "The First Moonbeam", emoji: "🌙", tone: "bg-paper",
@@ -25,7 +25,8 @@ export function Story() {
   }, []);
 
   return (
-    <section id="story" className="relative px-4 py-24">
+    <section id="story" className="relative isolate px-4 py-24">
+      <StarField count={14} seed={31} className="chaos-only -z-10" />
       <SectionHeading kicker="Origin story" title="How Pip became a dream engineer" />
       <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-[180px_1fr]">
         <ol aria-label="Story progress" className="sticky top-24 hidden h-fit space-y-4 md:block">
