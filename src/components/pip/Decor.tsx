@@ -27,10 +27,11 @@ export function StarField({ count = 18, seed = 1, className = "" }: { count?: nu
   return (
     <div aria-hidden className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
       {stars.map((st, i) => {
-        const dx = chaos ? Math.round((rand(i * 13 + seed) - 0.5) * 30) : 0;
-        const dy = chaos ? Math.round((rand(i * 17 + seed) - 0.5) * 30) : 0;
+        const cx = Math.round((rand(i * 13 + seed) - 0.5) * 30);
+        const cy = Math.round((rand(i * 17 + seed) - 0.5) * 30);
         return (
-          <span key={i} className="deco absolute" style={{ left: `${st.x}%`, top: `${st.y}%`, transform: `translate(${dx}vw, ${dy}vh) rotate(${chaos ? i * 40 : 0}deg)` }}>
+          <span key={i} className={`deco deco-star absolute ${chaos ? "is-chaos" : ""}`}
+            style={{ left: `${st.x}%`, top: `${st.y}%`, ["--cx" as string]: cx, ["--cy" as string]: cy, ["--cr" as string]: `${i * 40}deg` } as React.CSSProperties}>
             <Star size={st.s} className="animate-twinkle" style={{ animationDelay: `${st.d}s` }} />
           </span>
         );
