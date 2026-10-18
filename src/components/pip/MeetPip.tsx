@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import portrait from "@/assets/pip_portrait.jpg.asset.json";
 import { SectionHeading, Star, StarField } from "./Decor";
 import { blip } from "@/lib/sound";
