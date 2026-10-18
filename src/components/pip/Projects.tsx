@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Play, Square } from "lucide-react";
 import lullaby from "@/assets/pip_lullaby_box.jpg.asset.json";
-import { Cloud, SectionHeading, Star, StarField } from "./Decor";
+import { Cloud, SectionHeading, StarField } from "./Decor";
 import { audioSupported, blip, startLullaby, stopLullaby } from "@/lib/sound";
 import { useSettings } from "./settings";
 import { GrowthChart, NightlightCollection, RattleBlocks, Storybook } from "./MoreProjects";
