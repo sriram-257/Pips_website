@@ -18,7 +18,7 @@ export function Story() {
   useEffect(() => {
     if (!("IntersectionObserver" in window)) return;
     const io = new IntersectionObserver((es) => {
-      es.forEach((e) => { if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset.i)); });
+      es.forEach((e) => { if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset["i"])); });
     }, { rootMargin: "-45% 0px -45% 0px" });
     refs.current.forEach((r) => r && io.observe(r));
     return () => io.disconnect();

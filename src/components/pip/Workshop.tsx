@@ -15,7 +15,7 @@ const INGREDIENTS: { key: Key; label: string; icon: string; dream: string }[] = 
 export function describeDream(mix: Record<Key, number>, night: boolean): string {
   const picked = INGREDIENTS.filter((i) => mix[i.key] > 0);
   if (!picked.length) return "The dream jar is empty. Add an ingredient to begin!";
-  const top = [...picked].sort((a, b) => mix[b.key] - mix[a.key])[0];
+  const top = [...picked].sort((a, b) => mix[b.key] - mix[a.key])[0]!;
   const parts = picked.map((i) => `${mix[i.key]} ${i.label.toLowerCase()}`).join(", ");
   return `You added ${parts}. Tonight's dream might contain ${top.dream}${night ? ", under a sleepy lavender sky" : ", warmed by a peachy sunrise"}.`;
 }

@@ -15,7 +15,7 @@ const STOPS = [
 
 function CloudRailway() {
   const [stop, setStop] = useState(0);
-  const s = STOPS[stop];
+  const s = STOPS[stop]!;
   return (
     <article className="reveal paper relative overflow-hidden rounded-[2.5rem] p-6 sm:p-10 md:col-span-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
