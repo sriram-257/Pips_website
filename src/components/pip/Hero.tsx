@@ -79,7 +79,6 @@ export function Hero({ onMoon }: { onMoon: () => void }) {
           <figure className="portrait-frame animate-float relative aspect-[896/1090] rounded-[45%_45%_2rem_2rem]">
             <img src={avatar.url} alt="Pip the Skull Baby waving from a fluffy dream cloud" className="h-full w-full object-cover" width={896} height={1090} />
           </figure>
-          <span className="handwritten absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-paper px-4 py-1 text-sm shadow">fig. 1 — Pip, on shift</span>
         </div>
       </div>
     </section>
