@@ -14,7 +14,9 @@ export function SparkleTrail() {
     if (!fine || reduce || !layer.current) return;
     let last = 0;
     const el = layer.current;
+    const timers = new Set<ReturnType<typeof setTimeout>>();
     const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" && e.pointerType !== "pen") return;
       const now = performance.now();
       if (now - last < 40) return;
       last = now;
@@ -24,10 +26,11 @@ export function SparkleTrail() {
       const size = 6 + Math.random() * 8;
       Object.assign(s.style, { left: `${e.clientX}px`, top: `${e.clientY}px`, width: `${size}px`, height: `${size}px`, animation: "sparkle-fade .8s ease-out forwards" });
       el.appendChild(s);
-      setTimeout(() => s.remove(), 850);
+      const t = setTimeout(() => { s.remove(); timers.delete(t); }, 850);
+      timers.add(t);
     };
     window.addEventListener("pointermove", onMove, { passive: true });
-    return () => { window.removeEventListener("pointermove", onMove); el.replaceChildren(); };
+    return () => { window.removeEventListener("pointermove", onMove); timers.forEach(clearTimeout); el.replaceChildren(); };
   }, []);
   return <div ref={layer} aria-hidden className="pointer-events-none fixed inset-0 z-50" />;
 }
