@@ -25,7 +25,7 @@ export function Story() {
   }, []);
 
   return (
-    <section id="story" className="relative scroll-mt-20 px-4 py-24">
+    <section id="story" className="relative px-4 py-24">
       <SectionHeading kicker="Origin story" title="How Pip became a dream engineer" />
       <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-[180px_1fr]">
         <ol aria-label="Story progress" className="sticky top-24 hidden h-fit space-y-4 md:block">

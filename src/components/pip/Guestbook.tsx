@@ -46,7 +46,7 @@ export function Guestbook() {
   };
 
   return (
-    <section id="guestbook" className="relative scroll-mt-20 px-4 py-24">
+    <section id="guestbook" className="relative px-4 py-24">
       <SectionHeading kicker="Sign in, sleepyhead" title="The Midnight Guestbook">Leave a nickname and a dream wish.</SectionHeading>
       <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-[1fr_1.2fr]">
         <form onSubmit={submit} noValidate className="reveal paper h-fit rounded-[2rem] p-6 sm:p-8">
