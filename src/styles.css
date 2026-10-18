@@ -207,7 +207,8 @@
 /* chaos mode: decorative only */
 .chaos .deco { transition: transform 1.2s cubic-bezier(.3,1.5,.5,1), filter 1s; }
 .chaos .deco-cloud { animation-duration: 4s !important; }
-.chaos body, body:has(.chaos) { filter: hue-rotate(12deg); }
+html.chaos { --sky-top: oklch(0.93 0.06 330); }
+html.dark.chaos { --sky-top: oklch(0.4 0.1 320); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }

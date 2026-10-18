@@ -24,10 +24,10 @@ export function TopBar() {
           <button onClick={toggleChaos} aria-pressed={chaos} aria-label="A little dream chaos" className={`chip min-h-9 ${chaos ? "bg-accent" : ""}`} title="A little dream chaos">
             <Sparkles size={14} /><span className="hidden lg:inline">A little dream chaos</span>
           </button>
-          <button onClick={toggleSound} aria-pressed={sound} aria-label={sound ? "Mute sounds" : "Turn sounds on"} className={`chip min-h-9 ${sound ? "bg-accent" : ""}`}>
+          <button onClick={toggleSound} aria-pressed={sound} aria-label="Sound effects" className={`chip min-h-9 ${sound ? "bg-accent" : ""}`}>
             {sound ? <Volume2 size={14} /> : <VolumeX size={14} />}<span className="hidden lg:inline">{sound ? "Sound on" : "Muted"}</span>
           </button>
-          <button onClick={toggleNight} aria-pressed={night} aria-label={night ? "Switch to day" : "Switch to night"} className="chip min-h-9">
+          <button onClick={toggleNight} aria-pressed={night} aria-label="Night mode" className="chip min-h-9">
             {night ? <Sun size={14} /> : <Moon size={14} />}<span className="hidden lg:inline">{night ? "Day" : "Night"}</span>
           </button>
         </div>
