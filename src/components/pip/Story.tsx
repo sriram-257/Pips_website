@@ -19,7 +19,7 @@ export function Story() {
     if (!("IntersectionObserver" in window)) return;
     const io = new IntersectionObserver((es) => {
       es.forEach((e) => { if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset["i"])); });
-    }, { rootMargin: "-45% 0px -45% 0px" });
+    }, { rootMargin: "-35% 0px -35% 0px", threshold: 0 });
     refs.current.forEach((r) => r && io.observe(r));
     return () => io.disconnect();
   }, []);
@@ -38,7 +38,7 @@ export function Story() {
             </li>
           ))}
         </ol>
-        <div className="space-y-[30vh] pb-[10vh]">
+        <div className="space-y-12 sm:space-y-16">
           {SCENES.map((s, i) => (
             <article key={s.title} id={`scene-${i + 1}`} data-i={i} ref={(el) => { refs.current[i] = el; }}
               className={`reveal paper relative overflow-hidden rounded-[2.5rem] p-8 transition-transform duration-700 sm:p-12 ${s.tone} ${i === active ? "scale-100" : "scale-[0.97]"}`}>

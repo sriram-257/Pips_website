@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Play, Square } from "lucide-react";
 import lullaby from "@/assets/pip_lullaby_box.jpg.asset.json";
 import lantern from "@/assets/pip_dream_lantern.jpg.asset.json";
@@ -44,10 +44,17 @@ function CloudRailway() {
 }
 
 function LullabyMachine() {
+  const { sound } = useSettings();
   const [playing, setPlaying] = useState(false);
   const [err, setErr] = useState("");
+  useEffect(() => {
+    if (!sound) { stopLullaby(); setPlaying(false); }
+  }, [sound]);
+  useEffect(() => () => stopLullaby(), []);
   const toggle = () => {
     if (playing) { stopLullaby(); setPlaying(false); return; }
+    if (!sound) { setErr("Sound is muted. Turn sound on in the top bar to hear the lullaby."); return; }
+    setErr("");
     if (!audioSupported() || !startLullaby()) { setErr("Your browser can't play generated sound, but the box is still very pretty."); return; }
     setPlaying(true);
   };
