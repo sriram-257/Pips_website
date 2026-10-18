@@ -89,11 +89,11 @@ export function MeetPip() {
               <img src={portrait.url} alt="Official portrait of Pip holding a lantern and a tiny music box" className="h-full w-full object-cover" loading="lazy" width={682} height={1024} />
             </figure>
           </button>
-          <p className="pointer-events-none absolute -bottom-7 left-1/2 hidden -translate-x-1/2 whitespace-nowrap text-xs text-muted-foreground lg:block" aria-hidden="true">Move your mouse near Pip — he leans in to say hi.</p>
           <div role="status" aria-live="polite" key={line} className="paper animate-pop absolute -right-4 -top-8 max-w-[14rem] rounded-2xl rounded-bl-none px-4 py-3 text-sm sm:-right-16">
             {line}
           </div>
           <p className="mt-4 text-center text-xs text-muted-foreground">Boops given: {boop}</p>
+          <p className="mt-1 hidden text-center text-xs text-muted-foreground/70 lg:block" aria-hidden="true">Move your mouse near Pip — he leans in to say hi.</p>
         </div>
 
         <div className="reveal space-y-6">
