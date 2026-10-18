@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import portrait from "@/assets/pip_portrait.jpg.asset.json";
 import { SectionHeading, Star, StarField } from "./Decor";
 import { blip } from "@/lib/sound";
@@ -17,7 +17,62 @@ const TRAITS = [
   ["Slightly sleepy", "Yawns at exactly 3:07 a.m., every time."],
 ];
 
+/**
+ * Pupil glint overlay — two tiny glow dots aligned with the highlights already
+ * painted in the official portrait. They drift a few px toward the pointer on
+ * desktop (fine pointer, no reduced motion) and rest exactly on the painted
+ * highlights otherwise, so the artwork is never altered. Touch users keep the
+ * existing tap/boop reaction instead.
+ */
+function PupilGlints({ anchor }: { anchor: React.RefObject<HTMLElement | null> }) {
+  const left = useRef<HTMLSpanElement>(null);
+  const right = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const fine = window.matchMedia("(pointer: fine)").matches;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!fine || reduce) return;
+    const MAX = 4; // px, clamped
+    let raf = 0;
+    const apply = (dx: number, dy: number) => {
+      for (const el of [left.current, right.current]) {
+        if (el) el.style.transform = `translate(${dx}px, ${dy}px)`;
+      }
+    };
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" && e.pointerType !== "pen") return;
+      const fig = anchor.current;
+      if (!fig) return;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const r = fig.getBoundingClientRect();
+        const nx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+        const ny = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+        apply(Math.max(-MAX, Math.min(MAX, nx * MAX)), Math.max(-MAX, Math.min(MAX, ny * MAX)));
+      });
+    };
+    const reset = () => { cancelAnimationFrame(raf); apply(0, 0); };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerleave", reset);
+    window.addEventListener("blur", reset);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerleave", reset);
+      window.removeEventListener("blur", reset);
+    };
+  }, [anchor]);
+  const dot = "pointer-events-none absolute rounded-full transition-transform duration-150 ease-out motion-reduce:transition-none";
+  const glow: React.CSSProperties = { background: "radial-gradient(circle, #fff8e8 0%, #ffe9b8 55%, transparent 75%)", width: "4.5%", aspectRatio: "1" };
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0">
+      <span ref={left} className={dot} style={{ ...glow, left: "39.5%", top: "42.3%" }} />
+      <span ref={right} className={dot} style={{ ...glow, left: "61.8%", top: "37.6%" }} />
+    </div>
+  );
+}
+
 export function MeetPip() {
+  const figRef = useRef<HTMLElement>(null);
   const [line, setLine] = useState("Tap me! I don't bite — I don't even have teeth.");
   const [boop, setBoop] = useState(0);
   const react = () => {
@@ -34,8 +89,9 @@ export function MeetPip() {
       <div className="mx-auto grid max-w-5xl items-center gap-12 md:grid-cols-[0.9fr_1.1fr]">
         <div className="reveal relative mx-auto w-full max-w-xs">
           <button onClick={react} aria-label="Boop Pip for a friendly message" className="group block w-full">
-            <figure key={boop} className={`portrait-frame aspect-[682/1024] rounded-[2rem] transition-transform group-hover:-translate-y-2 group-hover:rotate-[-2deg] ${boop ? "animate-wiggle" : ""}`}>
+            <figure ref={figRef} key={boop} className={`portrait-frame relative aspect-[682/1024] rounded-[2rem] transition-transform group-hover:-translate-y-2 group-hover:rotate-[-2deg] ${boop ? "animate-wiggle" : ""}`}>
               <img src={portrait.url} alt="Official portrait of Pip holding a lantern and a tiny music box" className="h-full w-full object-cover" loading="lazy" width={682} height={1024} />
+              <PupilGlints anchor={figRef} />
             </figure>
           </button>
           <div role="status" aria-live="polite" key={line} className="paper animate-pop absolute -right-4 -top-8 max-w-[14rem] rounded-2xl rounded-bl-none px-4 py-3 text-sm sm:-right-16">
