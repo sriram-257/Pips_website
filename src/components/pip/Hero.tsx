@@ -54,7 +54,7 @@ export function Hero({ onMoon }: { onMoon: () => void }) {
             Dream workshop open
           </span>
           <h1 className="mt-6 text-[2.6rem] font-semibold leading-[1.02] sm:text-6xl lg:text-7xl">
-            The stars are still <span className="text-primary">under construction.</span>
+            Every little star has a dream. <span className="text-primary">Pip makes it come true.</span>
           </h1>
           <p className="handwritten mt-6 text-xl sm:text-2xl">“I build the dreams you fall asleep inside.”</p>
           <p className="mt-2 text-muted-foreground">— Pip, Junior Dream Engineer at the Midnight Nursery</p>
