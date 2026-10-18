@@ -31,7 +31,7 @@ function PupilGlints({ anchor }: { anchor: React.RefObject<HTMLElement | null> }
     const fine = window.matchMedia("(pointer: fine)").matches;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!fine || reduce) return;
-    const MAX = 4; // px, clamped
+    const MAX = 6; // px, clamped
     let raf = 0;
     const apply = (dx: number, dy: number) => {
       for (const el of [left.current, right.current]) {
@@ -62,7 +62,7 @@ function PupilGlints({ anchor }: { anchor: React.RefObject<HTMLElement | null> }
     };
   }, [anchor]);
   const dot = "pointer-events-none absolute rounded-full transition-transform duration-150 ease-out motion-reduce:transition-none";
-  const glow: React.CSSProperties = { background: "radial-gradient(circle, #fff8e8 0%, #ffe9b8 55%, transparent 75%)", width: "4.5%", aspectRatio: "1" };
+  const glow: React.CSSProperties = { background: "radial-gradient(circle, #fff8e8 0%, #ffe9b8 55%, transparent 75%)", width: "6.5%", aspectRatio: "1" };
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0">
       <span ref={left} className={dot} style={{ ...glow, left: "39.5%", top: "42.3%" }} />
