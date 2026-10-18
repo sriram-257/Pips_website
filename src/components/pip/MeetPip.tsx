@@ -18,39 +18,42 @@ const TRAITS = [
 ];
 
 /**
- * Pupil glint overlay — two tiny glow dots aligned with the highlights already
- * painted in the official portrait. They drift a few px toward the pointer on
- * desktop (fine pointer, no reduced motion) and rest exactly on the painted
- * highlights otherwise, so the artwork is never altered. Touch users keep the
- * existing tap/boop reaction instead.
+ * Cursor reaction — the whole portrait card gently leans/tilts toward the
+ * pointer (clamped, ~10px + a whisper of rotation) while the pointer is near
+ * Pip, and settles back when it moves away. Desktop only (fine pointer, no
+ * reduced motion); touch users keep the tap/boop reaction. The official
+ * artwork itself is never altered.
  */
-function PupilGlints({ anchor }: { anchor: React.RefObject<HTMLElement | null> }) {
-  const left = useRef<HTMLSpanElement>(null);
-  const right = useRef<HTMLSpanElement>(null);
+function useCursorLean(target: React.RefObject<HTMLElement | null>) {
   useEffect(() => {
     const fine = window.matchMedia("(pointer: fine)").matches;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!fine || reduce) return;
-    const MAX = 6; // px, clamped
+    const MAX = 10; // px, clamped
+    const TILT = 2.5; // deg, clamped
     let raf = 0;
-    const apply = (dx: number, dy: number) => {
-      for (const el of [left.current, right.current]) {
-        if (el) el.style.transform = `translate(${dx}px, ${dy}px)`;
-      }
+    const apply = (dx: number, dy: number, rz: number) => {
+      const el = target.current;
+      if (el) el.style.transform = `translate(${dx}px, ${dy}px) rotate(${rz}deg)`;
     };
     const onMove = (e: PointerEvent) => {
       if (e.pointerType !== "mouse" && e.pointerType !== "pen") return;
-      const fig = anchor.current;
-      if (!fig) return;
+      const el = target.current;
+      if (!el) return;
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        const r = fig.getBoundingClientRect();
-        const nx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
-        const ny = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
-        apply(Math.max(-MAX, Math.min(MAX, nx * MAX)), Math.max(-MAX, Math.min(MAX, ny * MAX)));
+        const r = el.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const nx = (e.clientX - cx) / (r.width / 2);
+        const ny = (e.clientY - cy) / (r.height / 2);
+        // Only react while the pointer is near the portrait (within ~1.6x its bounds).
+        if (Math.abs(nx) > 1.6 || Math.abs(ny) > 1.6) { apply(0, 0, 0); return; }
+        const clamp = (v: number, m: number) => Math.max(-m, Math.min(m, v));
+        apply(clamp(nx * MAX, MAX), clamp(ny * MAX, MAX), clamp(nx * TILT, TILT));
       });
     };
-    const reset = () => { cancelAnimationFrame(raf); apply(0, 0); };
+    const reset = () => { cancelAnimationFrame(raf); apply(0, 0, 0); };
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("pointerleave", reset);
     window.addEventListener("blur", reset);
@@ -60,15 +63,7 @@ function PupilGlints({ anchor }: { anchor: React.RefObject<HTMLElement | null> }
       window.removeEventListener("pointerleave", reset);
       window.removeEventListener("blur", reset);
     };
-  }, [anchor]);
-  const dot = "pointer-events-none absolute rounded-full transition-transform duration-150 ease-out motion-reduce:transition-none";
-  const glow: React.CSSProperties = { background: "radial-gradient(circle, #fff8e8 0%, #ffe9b8 55%, transparent 75%)", width: "6.5%", aspectRatio: "1" };
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0">
-      <span ref={left} className={dot} style={{ ...glow, left: "39.5%", top: "42.3%" }} />
-      <span ref={right} className={dot} style={{ ...glow, left: "61.8%", top: "37.6%" }} />
-    </div>
-  );
+  }, [target]);
 }
 
 export function MeetPip() {
