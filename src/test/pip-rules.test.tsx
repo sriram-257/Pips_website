@@ -13,3 +13,9 @@ describe("dream workshop", () => {
   it("names moonbeams as a glowing forest", () =>
     expect(describeDream({ clouds: 0, stars: 0, moonbeams: 3, lantern: 0 }, true)).toContain("3 moonbeams"));
 });
+
+import { friendlyError } from "@/components/pip/Guestbook";
+describe("guestbook anti-spam messages", () => {
+  it("explains the 30 second nickname wait", () => expect(friendlyError("guestbook_slow_down")).toContain("30 seconds"));
+  it("explains duplicate wishes", () => expect(friendlyError("guestbook_duplicate")).toContain("exact wish"));
+});
