@@ -53,6 +53,7 @@ const MELODY = [659, 784, 880, 784, 659, 587, 523, 587, 659, 523, 587, 494, 523]
 
 /** Plays a looping music-box lullaby. Returns false if audio is unavailable. */
 export function startLullaby(): boolean {
+  if (!enabled) return false;
   const c = getCtx();
   if (!c) return false;
   stopLullaby();
