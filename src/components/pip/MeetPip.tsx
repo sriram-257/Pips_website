@@ -22,7 +22,7 @@ export function MeetPip() {
   const [boop, setBoop] = useState(0);
   const react = () => {
     let next = line;
-    while (next === line) next = LINES[Math.floor(Math.random() * LINES.length)];
+    while (next === line) next = LINES[Math.floor(Math.random() * LINES.length)]!;
     setLine(next);
     setBoop((b) => b + 1);
     blip("sparkle");
