@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Play, Square } from "lucide-react";
 import lullaby from "@/assets/pip_lullaby_box.jpg.asset.json";
-import lantern from "@/assets/pip_dream_lantern.jpg.asset.json";
 import { Cloud, SectionHeading, Star, StarField } from "./Decor";
 import { audioSupported, blip, startLullaby, stopLullaby } from "@/lib/sound";
 import { useSettings } from "./settings";
+import { GrowthChart, NightlightCollection, RattleBlocks, Storybook } from "./MoreProjects";
+
+const INDEX = [["Lullaby Lab","#lullaby"],["Nightlights","#nightlights"],["Delivery Routes","#routes"],["Rattle & Blocks","#toys"],["Storybook","#storybook"],["Growth Chart","#growth"]];
 
 const STOPS = [
   { name: "Puddle Peak", x: 15, y: 70, text: "A hill made of rain puddles you can bounce across without getting wet." },
@@ -17,12 +19,12 @@ function CloudRailway() {
   const [stop, setStop] = useState(0);
   const s = STOPS[stop]!;
   return (
-    <article className="reveal paper relative overflow-hidden rounded-[2.5rem] p-6 sm:p-10 md:col-span-2">
+    <article id="routes" className="reveal paper relative scroll-mt-28 overflow-hidden rounded-[2.5rem] p-6 sm:p-10 md:col-span-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-3xl font-semibold">The Cloud Railway</h3>
+        <h3 className="text-3xl font-semibold">Dream Delivery Routes</h3>
         <span className="chip">🚂 In service, mostly</span>
       </div>
-      <p className="mt-2 max-w-xl text-muted-foreground">A tiny railway that carries sleepy visitors between floating islands. Tap a station to see where the train goes tonight.</p>
+      <p className="mt-2 max-w-xl text-muted-foreground">The route Pip flies across the rooftops each night, delivering dreams by cloud train. Tap a stop to pick tonight's destination.</p>
       <div className="relative mt-6 aspect-[4/3] sm:aspect-[16/7] rounded-3xl bg-muted">
         <svg aria-hidden viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
           <polyline points={STOPS.map((p) => `${p.x},${p.y}`).join(" ")} fill="none" stroke="var(--primary)" strokeWidth="0.8" strokeDasharray="3 3" className="animate-dash" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
@@ -59,9 +61,9 @@ function LullabyMachine() {
     setPlaying(true);
   };
   return (
-    <article className="reveal relative overflow-hidden rounded-[2rem_6rem_2rem_2rem] border-2 border-foreground bg-secondary p-6 shadow-[var(--shadow-soft)] sm:p-8">
+    <article id="lullaby" className="reveal relative scroll-mt-28 overflow-hidden rounded-[2rem_6rem_2rem_2rem] border-2 border-foreground bg-secondary p-6 shadow-[var(--shadow-soft)] sm:p-8">
       <span className="chip">{playing ? "♪ Now playing" : "Dream in progress"}</span>
-      <h3 className="mt-3 text-3xl font-semibold">The Lullaby Machine</h3>
+      <h3 className="mt-3 text-3xl font-semibold">The Lullaby Lab</h3>
       <p className="mt-2 text-muted-foreground">Turns gentle sounds into dreamscapes. Wind the key and listen to a tiny music-box tune, made on the spot.</p>
       <div className="relative mx-auto mt-6 max-w-xs">
         <img src={lullaby.url} alt="Pip's Lullaby Lab music box with a golden winding key and star chimes" loading="lazy"
@@ -84,42 +86,21 @@ function LullabyMachine() {
   );
 }
 
-function LostStarLantern() {
-  const [lit, setLit] = useState(false);
-  const [found, setFound] = useState(0);
-  const { night } = useSettings();
-  const shine = () => { setLit(true); setFound((f) => Math.min(f + 1, 5)); blip("sparkle"); };
-  return (
-    <article className={`reveal relative overflow-hidden rounded-[6rem_2rem_2rem_2rem] border-2 border-foreground p-6 shadow-[var(--shadow-soft)] transition-colors duration-700 sm:p-8 ${lit || night ? "bg-card" : "bg-foreground text-background"}`}>
-      <span className="chip text-foreground">{found >= 5 ? "All stars home ✨" : "Search party active"}</span>
-      <h3 className="mt-3 text-3xl font-semibold">The Lost-Star Lantern</h3>
-      <p className={`mt-2 ${lit || night ? "text-muted-foreground" : "opacity-80"}`}>A little lantern that helps lost stars find their way home. It's dark in here — tap the lantern.</p>
-      <button onClick={shine} aria-label="Shine the lantern to find a lost star" className="relative mx-auto mt-6 block max-w-xs">
-        <span aria-hidden className={`absolute inset-0 -m-10 rounded-full transition-opacity duration-700 ${lit ? "opacity-100" : "opacity-0"}`} style={{ background: "radial-gradient(circle, var(--glow), transparent 65%)" }} />
-        <img src={lantern.url} alt="Pip's glowing crescent-moon dream lantern" loading="lazy" width={1024} height={914}
-          className={`portrait-frame relative aspect-[1024/914] w-full rounded-full object-cover transition-[filter] duration-700 ${lit ? "" : "brightness-[0.82] saturate-[0.8]"}`} />
-      </button>
-      <div className="mt-6 flex justify-center gap-3" aria-label={`${found} of 5 stars found`}>
-        {Array.from({ length: 5 }, (_, i) => (
-          <Star key={i} size={22} className={`transition-all duration-500 ${i < found ? "animate-twinkle opacity-100" : "opacity-20"}`} />
-        ))}
-      </div>
-      <p role="status" aria-live="polite" className="mt-3 text-center font-display">
-        {found === 0 ? "No stars found yet…" : found < 5 ? `Found star #${found}! It was hiding behind a sock.` : "Every lost star is home. They say thank you (very quietly)."}
-      </p>
-    </article>
-  );
-}
-
 export function Projects() {
   return (
     <section id="projects" className="relative isolate px-4 py-24">
       <StarField count={14} seed={21} className="chaos-only -z-10" />
-      <SectionHeading kicker="Work in progress" title="Three dream projects">Little worlds Pip is building right now. Each one is a bit different. Poke them.</SectionHeading>
+      <SectionHeading kicker="Work in progress" title="Six dream projects">Little worlds Pip is building right now. Each one is a bit different. Poke them.</SectionHeading>
+      <nav aria-label="Project list" className="mx-auto mb-10 flex max-w-4xl flex-wrap justify-center gap-2">
+        {INDEX.map(([l, h]) => <a key={h} href={h} onClick={() => blip()} className="chip">{l}</a>)}
+      </nav>
       <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-2">
         <CloudRailway />
         <LullabyMachine />
-        <LostStarLantern />
+        <NightlightCollection />
+        <RattleBlocks />
+        <Storybook />
+        <GrowthChart />
       </div>
     </section>
   );
