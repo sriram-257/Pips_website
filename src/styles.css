@@ -201,8 +201,9 @@
 @utility animate-pop { animation: pop-in .45s cubic-bezier(.2,1.4,.4,1) both; }
 
 .reveal { opacity: 1; transform: none; }
-.js-reveal .reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s ease, transform .8s ease; }
-.js-reveal .reveal.is-in { opacity: 1; transform: none; }
+.js-reveal .reveal:not([data-revealed]) { opacity: 0; transform: translateY(24px); }
+.js-reveal .reveal { transition: opacity .8s ease, transform .8s ease, scale .7s ease; }
+.js-reveal .reveal[data-revealed] { opacity: 1; transform: none; }
 
 /* chaos mode: decorative only */
 .chaos .deco { transition: transform 1.2s cubic-bezier(.3,1.5,.5,1), filter 1s; }

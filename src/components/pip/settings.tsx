@@ -19,7 +19,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setNight(document.documentElement.classList.contains("dark"));
-    document.documentElement.classList.add("js-reveal");
   }, []);
 
   useEffect(() => {
@@ -59,15 +58,27 @@ export function useSettings() {
   return v;
 }
 
-/** Adds .is-in to .reveal elements once visible. Content is visible without JS. */
+/**
+ * Fades .reveal elements in as they enter the viewport.
+ * Uses a data attribute (not a class) so React re-renders that rewrite
+ * className never hide content again. Fails open: content is visible
+ * without JS, if observers are missing, or after a safety timeout.
+ */
 export function useReveal() {
   useEffect(() => {
-    const els = document.querySelectorAll(".reveal");
-    if (!("IntersectionObserver" in window)) { els.forEach((e) => e.classList.add("is-in")); return; }
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); } });
-    }, { threshold: 0.15 });
-    els.forEach((e) => io.observe(e));
-    return () => io.disconnect();
+    const root = document.documentElement;
+    const show = (el: Element) => el.setAttribute("data-revealed", "");
+    const all = () => document.querySelectorAll(".reveal").forEach(show);
+    if (!("IntersectionObserver" in window)) { all(); return; }
+    let io: IntersectionObserver;
+    try {
+      io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) { show(e.target); io.unobserve(e.target); } });
+      }, { threshold: 0, rootMargin: "0px 0px -5% 0px" });
+      document.querySelectorAll(".reveal:not([data-revealed])").forEach((el) => io.observe(el));
+    } catch { all(); return; }
+    root.classList.add("js-reveal");
+    const safety = setTimeout(all, 4000);
+    return () => { io.disconnect(); clearTimeout(safety); root.classList.remove("js-reveal"); };
   }, []);
 }

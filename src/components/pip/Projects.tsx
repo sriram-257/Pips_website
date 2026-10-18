@@ -97,7 +97,7 @@ function LostStarLantern() {
       <button onClick={shine} aria-label="Shine the lantern to find a lost star" className="relative mx-auto mt-6 block max-w-xs">
         <span aria-hidden className={`absolute inset-0 -m-10 rounded-full transition-opacity duration-700 ${lit ? "opacity-100" : "opacity-0"}`} style={{ background: "radial-gradient(circle, var(--glow), transparent 65%)" }} />
         <img src={lantern.url} alt="Pip's glowing crescent-moon dream lantern" loading="lazy" width={1024} height={914}
-          className={`portrait-frame relative aspect-[1024/914] w-full rounded-full object-cover transition-[filter] duration-700 ${lit ? "" : "brightness-50 saturate-50"}`} />
+          className={`portrait-frame relative aspect-[1024/914] w-full rounded-full object-cover transition-[filter] duration-700 ${lit ? "" : "brightness-[0.82] saturate-[0.8]"}`} />
       </button>
       <div className="mt-6 flex justify-center gap-3" aria-label={`${found} of 5 stars found`}>
         {Array.from({ length: 5 }, (_, i) => (
