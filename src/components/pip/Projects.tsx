@@ -7,10 +7,10 @@ import { audioSupported, blip, startLullaby, stopLullaby } from "@/lib/sound";
 import { useSettings } from "./settings";
 
 const STOPS = [
-  { name: "Puddle Peak", x: 12, y: 70, text: "A hill made of rain puddles you can bounce across without getting wet." },
+  { name: "Puddle Peak", x: 15, y: 70, text: "A hill made of rain puddles you can bounce across without getting wet." },
   { name: "Biscuit Bay", x: 40, y: 30, text: "Warm sand that smells like cookies. The tide brings in soft blankets." },
   { name: "Owl Library", x: 68, y: 62, text: "Owls read aloud until you drift off. Late fees are paid in yawns." },
-  { name: "Moon Dock", x: 90, y: 22, text: "Last stop. Visitors wave goodnight to the moon, and the moon waves back." },
+  { name: "Moon Dock", x: 85, y: 22, text: "Last stop. Visitors wave goodnight to the moon, and the moon waves back." },
 ];
 
 function CloudRailway() {
@@ -23,14 +23,14 @@ function CloudRailway() {
         <span className="chip">🚂 In service, mostly</span>
       </div>
       <p className="mt-2 max-w-xl text-muted-foreground">A tiny railway that carries sleepy visitors between floating islands. Tap a station to see where the train goes tonight.</p>
-      <div className="relative mt-6 aspect-[16/7] min-h-56 rounded-3xl bg-muted">
+      <div className="relative mt-6 aspect-[4/3] sm:aspect-[16/7] rounded-3xl bg-muted">
         <svg aria-hidden viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
           <polyline points={STOPS.map((p) => `${p.x},${p.y}`).join(" ")} fill="none" stroke="var(--primary)" strokeWidth="0.8" strokeDasharray="3 3" className="animate-dash" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
         </svg>
         {STOPS.map((p, i) => (
-          <button key={p.name} onClick={() => { setStop(i); blip(); }} aria-pressed={i === stop}
+          <button key={p.name} onClick={() => { setStop(i); blip(); }} aria-pressed={i === stop} aria-label={`Go to ${p.name}`}
             className="absolute -translate-x-1/2 -translate-y-1/2 text-center" style={{ left: `${p.x}%`, top: `${p.y}%` }}>
-            <Cloud className="w-20 sm:w-28" />
+            <Cloud className="w-16 sm:w-28" />
             <span className={`mt-[-0.6rem] block whitespace-nowrap rounded-full px-2 py-0.5 font-display text-xs ${i === stop ? "bg-primary text-primary-foreground" : "bg-paper"}`}>{p.name}</span>
           </button>
         ))}
