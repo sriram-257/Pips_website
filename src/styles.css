@@ -207,7 +207,14 @@
 
 /* chaos mode: decorative only */
 .chaos .deco { transition: transform 1.2s cubic-bezier(.3,1.5,.5,1), filter 1s; }
-.chaos .deco-cloud { animation-duration: 4s !important; }
+.chaos .deco-cloud { animation: chaos-cloud 5s ease-in-out infinite alternate !important; }
+.deco-star { --k: 1; transition: translate 1.2s cubic-bezier(.3,1.5,.5,1), rotate 1.2s ease; }
+.deco-star.is-chaos { translate: calc(var(--cx) * var(--k) * 1vw) calc(var(--cy) * var(--k) * 1vh); rotate: var(--cr); }
+.deco-star.is-chaos > * { animation: chaos-hop 1.6s ease-in-out infinite alternate; }
+@media (max-width: 640px) { .deco-star { --k: .35; } }
+@keyframes chaos-cloud { 0% { transform: translateX(-6vw) rotate(-8deg) } 100% { transform: translateX(6vw) rotate(8deg) } }
+@keyframes chaos-hop { 0% { transform: scale(.8) } 100% { transform: scale(1.4) rotate(45deg) } }
+@media (max-width: 640px) { @keyframes chaos-cloud { 0% { transform: translateX(-2vw) rotate(-4deg) } 100% { transform: translateX(2vw) rotate(4deg) } } }
 html.chaos { --sky-top: oklch(0.93 0.06 330); }
 html.dark.chaos { --sky-top: oklch(0.4 0.1 320); }
 
@@ -219,3 +226,10 @@ html.dark.chaos { --sky-top: oklch(0.4 0.1 320); }
 
 section[id] { scroll-margin-top: 6.5rem; }
 @media (min-width: 1024px) { section[id] { scroll-margin-top: 4.5rem; } }
+
+/* chaos-only decoration: hidden normally, never above content (sections are isolated, layer is -z-10) */
+.chaos-only { display: none; }
+html.chaos .chaos-only { display: block; }
+.hero-stars { opacity: .6; transition: opacity .6s; }
+html.chaos .hero-stars { opacity: 1; }
+html.chaos .deco-star > * { filter: drop-shadow(0 0 4px var(--glow)); }

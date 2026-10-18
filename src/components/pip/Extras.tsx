@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import avatar from "@/assets/pip_avatar_cloud.jpg.asset.json";
 import { Star } from "./Decor";
 import { blip } from "@/lib/sound";
+import { supabase } from "@/integrations/supabase/client";
 
 /** Sparkle cursor trail — fine pointers only, no reduced motion, capped particles. */
 export function SparkleTrail() {
@@ -13,7 +14,9 @@ export function SparkleTrail() {
     if (!fine || reduce || !layer.current) return;
     let last = 0;
     const el = layer.current;
+    const timers = new Set<ReturnType<typeof setTimeout>>();
     const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" && e.pointerType !== "pen") return;
       const now = performance.now();
       if (now - last < 40) return;
       last = now;
@@ -23,37 +26,48 @@ export function SparkleTrail() {
       const size = 6 + Math.random() * 8;
       Object.assign(s.style, { left: `${e.clientX}px`, top: `${e.clientY}px`, width: `${size}px`, height: `${size}px`, animation: "sparkle-fade .8s ease-out forwards" });
       el.appendChild(s);
-      setTimeout(() => s.remove(), 850);
+      const t = setTimeout(() => { s.remove(); timers.delete(t); }, 850);
+      timers.add(t);
     };
     window.addEventListener("pointermove", onMove, { passive: true });
-    return () => { window.removeEventListener("pointermove", onMove); el.replaceChildren(); };
+    return () => { window.removeEventListener("pointermove", onMove); timers.forEach(clearTimeout); el.replaceChildren(); };
   }, []);
   return <div ref={layer} aria-hidden className="pointer-events-none fixed inset-0 z-50" />;
 }
 
-/** Odometer — a local demo counter (visits in this browser). */
+/** Odometer — real global count from the backend; one count per browser session. */
 export function Odometer() {
   const [n, setN] = useState(0);
+  const [state, setState] = useState<"loading" | "live" | "offline">("loading");
   useEffect(() => {
-    let v = 1;
-    try { v = Number(localStorage.getItem("pip-visits") || "0") + 1; localStorage.setItem("pip-visits", String(v)); } catch { /* ignore */ }
-    const t = setTimeout(() => setN(v + 1200), 300);
-    return () => clearTimeout(t);
+    let alive = true;
+    (async () => {
+      let counted = false;
+      try { counted = sessionStorage.getItem("pip-visit-counted") === "1"; } catch { /* ignore */ }
+      const { data, error } = counted ? await supabase.rpc("get_visits") : await supabase.rpc("register_visit");
+      if (!alive) return;
+      if (error || data == null) { setState("offline"); return; }
+      if (!counted) { try { sessionStorage.setItem("pip-visit-counted", "1"); } catch { /* ignore */ } }
+      setN(Number(data)); setState("live");
+    })();
+    return () => { alive = false; };
   }, []);
-  const digits = String(n).padStart(6, "0").split("");
+  const digits = String(n).padStart(6, "0").slice(-6).split("");
   return (
-    <div className="inline-flex flex-col items-center gap-2">
+    <div className="inline-flex max-w-full flex-col items-center gap-2">
       <p className="font-display text-sm">Dreamers who stopped by</p>
-      <div role="img" aria-label={`Counter showing ${n}`} className="flex gap-1 rounded-xl border-2 border-foreground bg-foreground p-1.5">
+      <div role="img" aria-label={state === "live" ? `${n} visits counted` : "Visit counter unavailable"} className="flex gap-1 rounded-xl border-2 border-foreground bg-foreground p-1.5">
         {digits.map((d, i) => (
-          <span key={i} className="relative h-9 w-7 overflow-hidden rounded-md bg-paper font-display text-xl">
+          <span key={i} className="relative h-9 w-6 overflow-hidden rounded-md bg-paper font-display text-xl sm:w-7">
             <span className="absolute inset-x-0 top-0 flex flex-col transition-transform duration-[1400ms] ease-out" style={{ transform: `translateY(-${Number(d) * 10}%)`, transitionDelay: `${i * 80}ms` }}>
               {Array.from({ length: 10 }, (_, k) => <span key={k} className="grid h-9 place-items-center">{k}</span>)}
             </span>
           </span>
         ))}
       </div>
-      <p className="text-xs text-muted-foreground">Local demo counter — counts your visits from this browser (plus Pip's 1,200 imaginary friends).</p>
+      <p className="text-xs text-muted-foreground">
+        {state === "offline" ? "Counter is napping — couldn't reach the server." : "Real shared count: each browser session adds one. Not detailed analytics."}
+      </p>
     </div>
   );
 }

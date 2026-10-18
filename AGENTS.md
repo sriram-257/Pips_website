@@ -9,3 +9,4 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 - Pip site sections live in src/components/pip/; shared toggles (night/sound/chaos) go through settings.tsx context so every section reacts to one source of truth.
+- Guestbook and visit counter read/write Lovable Cloud directly from the browser client; anti-spam and timestamps are enforced by a DB trigger, and the counter table is only reachable via security-definer RPCs.

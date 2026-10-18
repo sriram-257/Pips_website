@@ -1,6 +1,6 @@
 import { useState } from "react";
 import portrait from "@/assets/pip_portrait.jpg.asset.json";
-import { SectionHeading, Star } from "./Decor";
+import { SectionHeading, Star, StarField } from "./Decor";
 import { blip } from "@/lib/sound";
 
 const LINES = [
@@ -28,7 +28,8 @@ export function MeetPip() {
     blip("sparkle");
   };
   return (
-    <section id="meet" className="relative px-4 py-24">
+    <section id="meet" className="relative isolate px-4 py-24">
+      <StarField count={14} seed={11} className="chaos-only -z-10" />
       <SectionHeading kicker="Character profile" title="Meet Pip" />
       <div className="mx-auto grid max-w-5xl items-center gap-12 md:grid-cols-[0.9fr_1.1fr]">
         <div className="reveal relative mx-auto w-full max-w-xs">
