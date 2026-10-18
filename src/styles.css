@@ -215,3 +215,6 @@ html.dark.chaos { --sky-top: oklch(0.4 0.1 320); }
   html { scroll-behavior: auto; }
   .js-reveal .reveal { opacity: 1; transform: none; }
 }
+
+section[id] { scroll-margin-top: 6.5rem; }
+@media (min-width: 1024px) { section[id] { scroll-margin-top: 4.5rem; } }

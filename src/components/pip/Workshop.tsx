@@ -26,7 +26,7 @@ export function Workshop() {
   const change = (k: Key, d: number) => { setMix((m) => ({ ...m, [k]: Math.max(0, Math.min(5, m[k] + d)) })); blip(); };
 
   return (
-    <section id="workshop" className="relative scroll-mt-20 px-4 py-24">
+    <section id="workshop" className="relative px-4 py-24">
       <SectionHeading kicker="Interactive" title="The Dream Workshop">Mix tonight's dream. Pip will handle the wiring.</SectionHeading>
       <div className="reveal mx-auto grid max-w-5xl gap-8 md:grid-cols-[1fr_1.1fr]">
         <div className="paper rounded-[2rem] p-6 sm:p-8">

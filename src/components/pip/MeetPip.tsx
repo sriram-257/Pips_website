@@ -28,7 +28,7 @@ export function MeetPip() {
     blip("sparkle");
   };
   return (
-    <section id="meet" className="relative scroll-mt-20 px-4 py-24">
+    <section id="meet" className="relative px-4 py-24">
       <SectionHeading kicker="Character profile" title="Meet Pip" />
       <div className="mx-auto grid max-w-5xl items-center gap-12 md:grid-cols-[0.9fr_1.1fr]">
         <div className="reveal relative mx-auto w-full max-w-xs">

@@ -106,7 +106,7 @@ function LostStarLantern() {
 
 export function Projects() {
   return (
-    <section id="projects" className="relative scroll-mt-20 px-4 py-24">
+    <section id="projects" className="relative px-4 py-24">
       <SectionHeading kicker="Work in progress" title="Three dream projects">Little worlds Pip is building right now. Each one is a bit different. Poke them.</SectionHeading>
       <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-2">
         <CloudRailway />
