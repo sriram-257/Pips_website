@@ -17,7 +17,62 @@ const TRAITS = [
   ["Slightly sleepy", "Yawns at exactly 3:07 a.m., every time."],
 ];
 
+/**
+ * Pupil glint overlay — two tiny glow dots aligned with the highlights already
+ * painted in the official portrait. They drift a few px toward the pointer on
+ * desktop (fine pointer, no reduced motion) and rest exactly on the painted
+ * highlights otherwise, so the artwork is never altered. Touch users keep the
+ * existing tap/boop reaction instead.
+ */
+function PupilGlints({ anchor }: { anchor: React.RefObject<HTMLElement | null> }) {
+  const left = useRef<HTMLSpanElement>(null);
+  const right = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const fine = window.matchMedia("(pointer: fine)").matches;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!fine || reduce) return;
+    const MAX = 4; // px, clamped
+    let raf = 0;
+    const apply = (dx: number, dy: number) => {
+      for (const el of [left.current, right.current]) {
+        if (el) el.style.transform = `translate(${dx}px, ${dy}px)`;
+      }
+    };
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" && e.pointerType !== "pen") return;
+      const fig = anchor.current;
+      if (!fig) return;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const r = fig.getBoundingClientRect();
+        const nx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+        const ny = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+        apply(Math.max(-MAX, Math.min(MAX, nx * MAX)), Math.max(-MAX, Math.min(MAX, ny * MAX)));
+      });
+    };
+    const reset = () => { cancelAnimationFrame(raf); apply(0, 0); };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerleave", reset);
+    window.addEventListener("blur", reset);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerleave", reset);
+      window.removeEventListener("blur", reset);
+    };
+  }, [anchor]);
+  const dot = "pointer-events-none absolute rounded-full transition-transform duration-150 ease-out motion-reduce:transition-none";
+  const glow: React.CSSProperties = { background: "radial-gradient(circle, #fff8e8 0%, #ffe9b8 55%, transparent 75%)", width: "4.5%", aspectRatio: "1" };
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0">
+      <span ref={left} className={dot} style={{ ...glow, left: "39.5%", top: "42.3%" }} />
+      <span ref={right} className={dot} style={{ ...glow, left: "61.8%", top: "37.6%" }} />
+    </div>
+  );
+}
+
 export function MeetPip() {
+  const figRef = useRef<HTMLElement>(null);
   const [line, setLine] = useState("Tap me! I don't bite — I don't even have teeth.");
   const [boop, setBoop] = useState(0);
   const react = () => {
