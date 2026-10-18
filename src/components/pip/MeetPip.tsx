@@ -89,8 +89,9 @@ export function MeetPip() {
       <div className="mx-auto grid max-w-5xl items-center gap-12 md:grid-cols-[0.9fr_1.1fr]">
         <div className="reveal relative mx-auto w-full max-w-xs">
           <button onClick={react} aria-label="Boop Pip for a friendly message" className="group block w-full">
-            <figure key={boop} className={`portrait-frame aspect-[682/1024] rounded-[2rem] transition-transform group-hover:-translate-y-2 group-hover:rotate-[-2deg] ${boop ? "animate-wiggle" : ""}`}>
+            <figure ref={figRef} key={boop} className={`portrait-frame relative aspect-[682/1024] rounded-[2rem] transition-transform group-hover:-translate-y-2 group-hover:rotate-[-2deg] ${boop ? "animate-wiggle" : ""}`}>
               <img src={portrait.url} alt="Official portrait of Pip holding a lantern and a tiny music box" className="h-full w-full object-cover" loading="lazy" width={682} height={1024} />
+              <PupilGlints anchor={figRef} />
             </figure>
           </button>
           <div role="status" aria-live="polite" key={line} className="paper animate-pop absolute -right-4 -top-8 max-w-[14rem] rounded-2xl rounded-bl-none px-4 py-3 text-sm sm:-right-16">
