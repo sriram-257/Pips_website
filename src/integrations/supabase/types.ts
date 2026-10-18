@@ -14,13 +14,49 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      guestbook_entries: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          nickname: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          nickname: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          nickname?: string
+        }
+        Relationships: []
+      }
+      site_counter: {
+        Row: {
+          id: number
+          visits: number
+        }
+        Insert: {
+          id: number
+          visits?: number
+        }
+        Update: {
+          id?: number
+          visits?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_visits: { Args: never; Returns: number }
+      register_visit: { Args: never; Returns: number }
     }
     Enums: {
       [_ in never]: never
