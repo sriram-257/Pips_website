@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { SectionHeading, Star, StarField } from "./Decor";
 import { blip } from "@/lib/sound";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,32 @@ type Entry = { id: string; nickname: string; message: string; created_at: string
 export const NAME_MAX = 24;
 export const WISH_MAX = 140;
 const COOLDOWN_MS = 30_000;
+const REQUEST_TIMEOUT_MS = 15_000;
+
+/** Bounds auth initialization as well as fetch, and aborts any late network request. */
+export async function guestbookRequest<T>(request: (signal: AbortSignal) => PromiseLike<T>): Promise<T> {
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      Promise.resolve().then(() => request(controller.signal)),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          controller.abort();
+          reject(new Error("guestbook_timeout"));
+        }, REQUEST_TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function errorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null && "message" in error) return String(error.message);
+  return "";
+}
 
 const SAMPLES = [
   { name: "Moth #42", wish: "A dream where I'm finally allowed to touch the lamp." },
@@ -27,6 +53,8 @@ export function friendlyError(msg: string): string {
   if (msg.includes("guestbook_slow_down")) return "That nickname just signed — please wait 30 seconds.";
   if (msg.includes("guestbook_duplicate")) return "Someone already pinned that exact wish. Try your own words!";
   if (msg.includes("guestbook_busy")) return "The guestbook is very busy. Try again in a minute.";
+  if (msg.includes("guestbook_timeout") || msg.includes("AbortError")) return "The request timed out. Check Recent wishes before retrying: your wish may have been saved.";
+  if (/permission denied|row-level security|401|403|JWT/i.test(msg)) return "The guestbook couldn't accept this request. Please refresh and try again; if it continues, access needs to be checked.";
   return "Pip couldn't reach the guestbook. Please try again.";
 }
 
@@ -48,37 +76,68 @@ export function Guestbook() {
   const [lastSent, setLastSent] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState("");
+  const [loadError, setLoadError] = useState("");
+  const submitting = useRef(false);
+  const loadVersion = useRef(0);
 
   const load = useCallback(async () => {
+    const version = ++loadVersion.current;
     setStatus("loading");
-    const { data, error: e } = await supabase
-      .from("guestbook_entries").select("id, nickname, message, created_at")
-      .order("created_at", { ascending: false }).limit(30);
-    if (e) { setStatus("error"); return; }
-    setEntries(data ?? []); setStatus("ready");
+    setLoadError("");
+    let nextStatus: "ready" | "error" = "error";
+    try {
+      const { data, error: e } = await guestbookRequest((signal) => supabase
+        .from("guestbook_entries").select("id, nickname, message, created_at")
+        .order("created_at", { ascending: false }).limit(30).abortSignal(signal));
+      if (e) throw e;
+      if (version !== loadVersion.current) return;
+      setEntries(data ?? []);
+      nextStatus = "ready";
+    } catch (e) {
+      if (version === loadVersion.current) setLoadError(
+        errorMessage(e).includes("guestbook_timeout")
+          ? "Fetching wishes timed out. Check your connection and try again."
+          : "Pip couldn't load recent wishes. Please try again.",
+      );
+    } finally {
+      if (version === loadVersion.current) setStatus(nextStatus);
+    }
   }, []);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+    return () => { loadVersion.current++; };
+  }, [load]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting.current) return;
     setOk("");
     if (trap) return; // honeypot: bots fill hidden fields
     const err = validateEntry(name, wish);
     if (!err && Date.now() - lastSent < COOLDOWN_MS) { setError("Thanks! Please wait a few seconds before pinning another wish."); return; }
     setError(err);
     if (err) return;
+    submitting.current = true;
     setSending(true);
-    const { data, error: dbErr } = await supabase
-      .from("guestbook_entries").insert({ nickname: name.trim(), message: wish.trim() })
-      .select("id, nickname, message, created_at").single();
-    setSending(false);
-    if (dbErr || !data) { setError(friendlyError(dbErr?.message ?? "")); return; }
-    setEntries((prev) => [data, ...prev.filter((p) => p.id !== data.id)].slice(0, 30));
-    setLastSent(Date.now());
-    setOk(`Thank you, ${data.nickname}! Your wish is now on the public starboard.`);
-    setName(""); setWish("");
-    blip("success");
+    try {
+      const { data, error: dbErr } = await guestbookRequest((signal) => supabase
+        .from("guestbook_entries").insert({ nickname: name.trim(), message: wish.trim() })
+        .select("id, nickname, message, created_at").abortSignal(signal).single());
+      if (dbErr) throw dbErr;
+      if (!data) throw new Error("No saved wish returned");
+      setEntries((prev) => [data, ...prev.filter((p) => p.id !== data.id)].slice(0, 30));
+      setLastSent(Date.now());
+      setOk(`Thank you, ${data.nickname}! Your wish is now on the public starboard.`);
+      setName(""); setWish("");
+      blip("success");
+      await load();
+    } catch (e) {
+      setError(friendlyError(errorMessage(e)));
+    } finally {
+      submitting.current = false;
+      setSending(false);
+    }
   };
 
   return (
@@ -111,7 +170,7 @@ export function Guestbook() {
             {status === "loading" && entries.length === 0 && <p className="mt-2 rounded-2xl border-2 border-dashed border-border p-5 text-muted-foreground" role="status">Pip is fetching the starboard…</p>}
             {status === "error" && (
               <div className="mt-2 rounded-2xl border-2 border-dashed border-border p-5" role="alert">
-                <p className="text-muted-foreground">The starboard is out of reach right now.</p>
+                <p className="text-muted-foreground">{loadError}</p>
                 <button type="button" onClick={() => void load()} className="btn-ghost-dream mt-3">Try again</button>
               </div>
             )}
