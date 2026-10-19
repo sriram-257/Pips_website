@@ -3,7 +3,8 @@ import { X } from "lucide-react";
 import avatar from "@/assets/pip_avatar_cloud.jpg.asset.json";
 import { Star } from "./Decor";
 import { blip } from "@/lib/sound";
-import { supabase } from "@/integrations/supabase/client";
+import { countVisit } from "@/lib/public-data.functions";
+import { guestbookRequest, unwrap } from "./Guestbook";
 
 /** Sparkle cursor trail — fine pointers only, no reduced motion, capped particles. */
 export function SparkleTrail() {
@@ -44,11 +45,15 @@ export function Odometer() {
     (async () => {
       let counted = false;
       try { counted = sessionStorage.getItem("pip-visit-counted") === "1"; } catch { /* ignore */ }
-      const { data, error } = counted ? await supabase.rpc("get_visits") : await supabase.rpc("register_visit");
-      if (!alive) return;
-      if (error || data == null) { setState("offline"); return; }
-      if (!counted) { try { sessionStorage.setItem("pip-visit-counted", "1"); } catch { /* ignore */ } }
-      setN(Number(data)); setState("live");
+      try {
+        const total = unwrap(await guestbookRequest(() => countVisit({ data: { register: !counted } })));
+        if (!alive) return;
+        if (!counted) { try { sessionStorage.setItem("pip-visit-counted", "1"); } catch { /* ignore */ } }
+        setN(total); setState("live");
+      } catch (e) {
+        console.warn("Visit counter unavailable", e);
+        if (alive) setState("offline");
+      }
     })();
     return () => { alive = false; };
   }, []);
@@ -56,7 +61,7 @@ export function Odometer() {
   return (
     <div className="inline-flex max-w-full flex-col items-center gap-2">
       <p className="font-display text-sm">Dreamers who stopped by</p>
-      <div role="img" aria-label={state === "live" ? `${n} visits counted` : "Visit counter unavailable"} className="flex gap-1 rounded-xl border-2 border-foreground bg-foreground p-1.5">
+      <div role="img" aria-label={state === "live" ? `${n} visits counted` : state === "loading" ? "Counting visits" : "Visit counter unavailable"} className={`flex gap-1 rounded-xl border-2 border-foreground bg-foreground p-1.5 ${state === "live" ? "" : "opacity-50"}`}>
         {digits.map((d, i) => (
           <span key={i} className="relative h-9 w-6 overflow-hidden rounded-md bg-paper font-display text-xl sm:w-7">
             <span className="absolute inset-x-0 top-0 flex flex-col transition-transform duration-[1400ms] ease-out" style={{ transform: `translateY(-${Number(d) * 10}%)`, transitionDelay: `${i * 80}ms` }}>
@@ -65,8 +70,10 @@ export function Odometer() {
           </span>
         ))}
       </div>
-      <p className="text-xs text-muted-foreground">
-        {state === "offline" ? "Counter is napping — couldn't reach the server." : "Real shared count: each browser session adds one. Not detailed analytics."}
+      <p className="text-xs text-muted-foreground" role="status">
+        {state === "offline" ? "Counter is napping — couldn't reach the server, so no number is shown."
+          : state === "loading" ? "Counting dreamers…"
+          : "Real shared count: each browser session adds one. Not detailed analytics."}
       </p>
     </div>
   );
