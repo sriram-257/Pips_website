@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SectionHeading, Star, StarField } from "./Decor";
 import { blip } from "@/lib/sound";
-import { supabase } from "@/integrations/supabase/client";
+import { listWishes, pinWish, type Result, type Wish } from "@/lib/public-data.functions";
 
-type Entry = { id: string; nickname: string; message: string; created_at: string };
+type Entry = Wish;
 export const NAME_MAX = 24;
 export const WISH_MAX = 140;
 const COOLDOWN_MS = 30_000;
 const REQUEST_TIMEOUT_MS = 15_000;
 
-/** Bounds auth initialization as well as fetch, and aborts any late network request. */
+/** Bounds any backend call so loading/saving states always resolve; aborts late work. */
 export async function guestbookRequest<T>(request: (signal: AbortSignal) => PromiseLike<T>): Promise<T> {
   const controller = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -26,6 +26,12 @@ export async function guestbookRequest<T>(request: (signal: AbortSignal) => Prom
   } finally {
     clearTimeout(timer);
   }
+}
+
+/** Unwraps a server result, turning a reported failure into a thrown error. */
+export function unwrap<T>(r: Result<T>): T {
+  if (!r.ok) throw new Error(r.error);
+  return r.data;
 }
 
 function errorMessage(error: unknown): string {
@@ -54,6 +60,8 @@ export function friendlyError(msg: string): string {
   if (msg.includes("guestbook_duplicate")) return "Someone already pinned that exact wish. Try your own words!";
   if (msg.includes("guestbook_busy")) return "The guestbook is very busy. Try again in a minute.";
   if (msg.includes("guestbook_timeout") || msg.includes("AbortError")) return "The request timed out. Check Recent wishes before retrying: your wish may have been saved.";
+  if (msg.includes("backend_not_configured")) return "The guestbook isn't connected to its storage on this version of the site. Your wish was not saved.";
+  if (msg.includes("invalid_nickname") || msg.includes("invalid_message")) return "Please check your nickname and wish length, then try again.";
   if (/permission denied|row-level security|401|403|JWT/i.test(msg)) return "The guestbook couldn't accept this request. Please refresh and try again; if it continues, access needs to be checked.";
   return "Pip couldn't reach the guestbook. Please try again.";
 }
@@ -86,17 +94,16 @@ export function Guestbook() {
     setLoadError("");
     let nextStatus: "ready" | "error" = "error";
     try {
-      const { data, error: e } = await guestbookRequest((signal) => supabase
-        .from("guestbook_entries").select("id, nickname, message, created_at")
-        .order("created_at", { ascending: false }).limit(30).abortSignal(signal));
-      if (e) throw e;
+      const data = unwrap(await guestbookRequest(() => listWishes()));
       if (version !== loadVersion.current) return;
-      setEntries(data ?? []);
+      setEntries(data);
       nextStatus = "ready";
     } catch (e) {
       if (version === loadVersion.current) setLoadError(
         errorMessage(e).includes("guestbook_timeout")
           ? "Fetching wishes timed out. Check your connection and try again."
+          : errorMessage(e).includes("backend_not_configured")
+          ? "The guestbook isn't connected to its storage on this version of the site."
           : "Pip couldn't load recent wishes. Please try again.",
       );
     } finally {
@@ -121,11 +128,7 @@ export function Guestbook() {
     submitting.current = true;
     setSending(true);
     try {
-      const { data, error: dbErr } = await guestbookRequest((signal) => supabase
-        .from("guestbook_entries").insert({ nickname: name.trim(), message: wish.trim() })
-        .select("id, nickname, message, created_at").abortSignal(signal).single());
-      if (dbErr) throw dbErr;
-      if (!data) throw new Error("No saved wish returned");
+      const data = unwrap(await guestbookRequest(() => pinWish({ data: { nickname: name.trim(), message: wish.trim() } })));
       setEntries((prev) => [data, ...prev.filter((p) => p.id !== data.id)].slice(0, 30));
       setLastSent(Date.now());
       setOk(`Thank you, ${data.nickname}! Your wish is now on the public starboard.`);
