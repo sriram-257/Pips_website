@@ -9,4 +9,5 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 - Pip site sections live in src/components/pip/; shared toggles (night/sound/chaos) go through settings.tsx context so every section reacts to one source of truth.
-- Guestbook and visit counter read/write Lovable Cloud directly from the browser client; anti-spam and timestamps are enforced by a DB trigger, and the counter table is only reachable via security-definer RPCs.
+- Guestbook and visit counter go through public server functions in src/lib/public-data.functions.ts (server-side publishable client, RLS as anon), never the browser Supabase client — the browser client depends on build-time env and auth-storage startup, which broke the published site. Anti-spam/timestamps are enforced by a DB trigger; the counter table is only reachable via security-definer RPCs.
+- src/start.ts registers no bearer-attaching functionMiddleware: the app has no sign-in, and the attacher blocked public server calls on browser auth startup. Re-add one only if authenticated server functions are introduced.
