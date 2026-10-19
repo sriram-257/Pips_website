@@ -5,7 +5,7 @@ const backend = vi.hoisted(() => ({ read: vi.fn(), save: vi.fn() }));
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: { from: () => ({
     select: () => ({ order: () => ({ limit: () => ({ abortSignal: backend.read }) }) }),
-    insert: () => ({ select: () => ({ single: () => ({ abortSignal: backend.save }) }) }),
+    insert: () => ({ select: () => ({ abortSignal: (signal: AbortSignal) => ({ single: () => backend.save(signal) }) }) }),
   }) },
 }));
 vi.mock("@/components/pip/Decor", () => ({ SectionHeading: () => null, Star: () => null, StarField: () => null }));

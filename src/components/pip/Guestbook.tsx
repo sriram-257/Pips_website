@@ -123,7 +123,7 @@ export function Guestbook() {
     try {
       const { data, error: dbErr } = await guestbookRequest((signal) => supabase
         .from("guestbook_entries").insert({ nickname: name.trim(), message: wish.trim() })
-        .select("id, nickname, message, created_at").single().abortSignal(signal));
+        .select("id, nickname, message, created_at").abortSignal(signal).single());
       if (dbErr) throw dbErr;
       if (!data) throw new Error("No saved wish returned");
       setEntries((prev) => [data, ...prev.filter((p) => p.id !== data.id)].slice(0, 30));
